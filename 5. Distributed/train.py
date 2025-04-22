@@ -19,7 +19,7 @@ from accelerate import Accelerator
 
 def main():
     # 모델과 토크나이저 로드
-    model_name = "Qwen/Qwen2.5-1.5B"
+    model_name = "../Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
@@ -43,10 +43,10 @@ def main():
     def preprocess_function(examples):
         return tokenizer(examples["text"], truncation=True, max_length=512)
 
-    dataset = load_dataset("Junnos/luckyvicky")  # 실제 데이터셋으로 교체 필요
+    dataset = load_dataset("csv", data_files="../hrm8k_dataset.csv")  # 실제 데이터셋으로 교체 필요
     # if int(os.envionr["RANK"])==0:
     print(f"Dataset load 직후: {dataset['train'][0]}")
-    dataset = dataset.map(lambda x: {'text': x['input'] + x['output']})
+    dataset = dataset.map(lambda x: {'text': x['question'] + str(x['answer'])})
     print(f"Text column 추가: {dataset['train'][0]}")
     tokenized_dataset = dataset.map(preprocess_function, 
                                     batched=True,
